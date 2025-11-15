@@ -1,0 +1,264 @@
+{
+    "races": [
+        {
+            "name": "Шлендрики",
+            "peoples": [
+                {
+                    "name": "Можоры",
+                    "effects": [
+                        {
+                            "type": "gulbon_money_increase",
+                            "parameters": {
+                                "percent": 23
+                            }
+                        },
+                        {
+                            "type": "zumba_health_chance",
+                            "parameters": {
+                                "chance": 0.333
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Нищебороды",
+                    "effects": [
+                        {
+                            "type": "gulbon_money_decrease",
+                            "parameters": {
+                                "percent": 87
+                            }
+                        },
+                        {
+                            "type": "gulbon_health_increase",
+                            "parameters": {
+                                "percent": 76
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Хипстики",
+            "peoples": [
+                {
+                    "name": "Соевые",
+                    "effects": [
+                        {
+                            "type": "zumba_health_penalty",
+                            "parameters": {
+                                "penalty_per_chuchundra": 0.12
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Просветленные",
+                    "effects": [
+                        {
+                            "type": "shlam_satisfaction_bonus",
+                            "parameters": {
+                                "multiplier": 0.31,
+                                "history_lookback": 3
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Скуфики",
+            "peoples": [
+                {
+                    "name": "Дроценты",
+                    "effects": [
+                        {
+                            "type": "gulbon_half_effect",
+                            "parameters": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "Железноухие",
+                    "effects": [
+                        {
+                            "type": "zumba_no_satisfaction_cost",
+                            "parameters": {
+                                "no_satisfaction": true
+                            }
+                        },
+                        {
+                            "type": "zumba_no_money_chance",
+                            "parameters": {
+                                "chance": 0.33
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "locations": [
+        {
+            "name": "Воркленд",
+            "areas": [
+                {
+                    "name": "Балбесбург",
+                    "effects": [
+                        {
+                            "type": "slesandra_health_damage",
+                            "parameters": {
+                                "chance": 0.15,
+                                "damage": 0.1
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Долбесбург",
+                    "effects": [
+                        {
+                            "type": "slesandra_productivity",
+                            "parameters": {
+                                "percent": 20
+                            }
+                        },
+                        {
+                            "type": "satisfaction_cost_increase",
+                            "parameters": {
+                                "percent": 30
+                            }
+                        }
+                    ]
+                }
+            ],
+            "fauna": {
+                "slesandra": 3,
+                "sisandra": 1,
+                "chuchundra": 1
+            }
+        },
+        {
+            "name": "Бичленд",
+            "areas": [
+                {
+                    "name": "Курамарибы",
+                    "effects": [
+                        {
+                            "type": "sisandra_stop_working",
+                            "parameters": {
+                                "chance": 0.7,
+                                "min_steps": 2
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Пунта-пеликана",
+                    "effects": [
+                        {
+                            "type": "sisandra_productivity",
+                            "parameters": {
+                                "percent": 23,
+                                "min_steps": 2
+                            }
+                        },
+                        {
+                            "type": "money_penalty_chance",
+                            "parameters": {
+                                "chance": 0.2,
+                                "percent": 50
+                            }
+                        }
+                    ]
+                }
+            ],
+            "fauna": {
+                "slesandra": 1,
+                "sisandra": 3,
+                "chuchundra": 1
+            }
+        },
+        {
+            "name": "Праналенд",
+            "areas": [
+                {
+                    "name": "Шринавас",
+                    "effects": [
+                        {
+                            "type": "chuchundra_productivity",
+                            "parameters": {
+                                "percent": 13
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Харе-Кириши",
+                    "effects": [
+                        {
+                            "type": "drocent_health_penalty",
+                            "parameters": {
+                                "percent": 10
+                            }
+                        }
+                    ]
+                }
+            ],
+            "fauna": {
+                "slesandra": 1,
+                "sisandra": 1,
+                "chuchundra": 3
+            }
+        }
+    ],
+    "activities": [
+        {
+            "name": "Зумбалить",
+            "base_health_cost": 1,
+            "base_money_cost": 0,
+            "base_satisfaction_cost": 1,
+            "gains": [
+                {
+                    "type": "money",
+                    "fauna": "slesandra",
+                    "amount": 2
+                }
+            ]
+        },
+        {
+            "name": "Гульбонить",
+            "base_health_cost": 1,
+            "base_money_cost": 1,
+            "base_satisfaction_cost": 0,
+            "gains": [
+                {
+                    "type": "satisfaction",
+                    "fauna": "sisandra",
+                    "amount": 2
+                }
+            ]
+        },
+        {
+            "name": "Шлямсать",
+            "base_health_cost": 0,
+            "base_money_cost": 1,
+            "base_satisfaction_cost": 1,
+            "gains": [
+                {
+                    "type": "health",
+                    "fauna": "chuchundra",
+                    "amount": 2
+                }
+            ]
+        },
+        {
+            "name": "Бездельничать",
+            "base_health_cost": 0.5,
+            "base_money_cost": 0.5,
+            "base_satisfaction_cost": 0.5,
+            "gains": []
+        }
+    ]
+}

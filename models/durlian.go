@@ -22,7 +22,7 @@ type Durlian struct {
 	CurrentArea     string    `json:"current_area"`
 	CurrentActivity string    `json:"current_activity"`
 	Stats           Stats     `json:"stats"`
-	LocationHistory []string  `json:"location_history"`
+	History         []string  `json:"history"`
 	Steps           int       `json:"steps"`
 	IsAlive         bool      `json:"is_alive"`
 	KnownInfo       KnownInfo `json:"known_info"` // То, что знает дурляндец
@@ -35,7 +35,7 @@ type KnownInfo struct {
 	CurrentArea     string   `json:"current_area"`
 	CurrentActivity string   `json:"current_activity"`
 	Stats           Stats    `json:"stats"`
-	LocationHistory []string `json:"location_history"`
+	History         []string `json:"history"`
 	Steps           int      `json:"steps"`
 	IsAlive         bool     `json:"is_alive"`
 }
@@ -62,7 +62,7 @@ func NewDurlian(races []Race, locations []Location) *Durlian {
 		CurrentArea:     area.Name,
 		CurrentActivity: "none",
 		Stats:           Stats{Health: 10, Money: 10, Satisfaction: 10},
-		LocationHistory: []string{location.Name},
+		History:         []string{location.Name},
 		Steps:           0,
 		IsAlive:         true,
 	}
@@ -81,7 +81,7 @@ func (d *Durlian) UpdateKnownInfo() {
 		CurrentArea:     d.CurrentArea,
 		CurrentActivity: d.CurrentActivity,
 		Stats:           d.Stats,
-		LocationHistory: d.LocationHistory,
+		History:         d.History,
 		Steps:           d.Steps,
 		IsAlive:         d.IsAlive,
 	}

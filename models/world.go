@@ -47,9 +47,9 @@ type Activity struct {
 	Gains                []Gain  `json:"gains"`
 }
 
-// Результат деятельности
+// Результат действия
 type Gain struct {
 	Type   string  `json:"type"`   // Стата
 	Fauna  string  `json:"fauna"`  // Животинка
-	Amount float64 `json:"amount"` // Кол-во животинки
+	Amount float64 `json:"amount"` // Награда за каждую животинку
 }

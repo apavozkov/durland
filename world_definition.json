@@ -1,0 +1,224 @@
+{
+  "locations": [
+    {
+      "name": "Воркленд",
+      "fauna": {
+        "slesandra": 3,
+        "sisandra": 1,
+        "chuchundra": 1
+      },
+      "areas": [
+        {
+          "name": "Балбесбург",
+          "effects": [
+            {
+              "type": "slesandra_damage_chance",
+              "parameters": {
+                "probability": 0.15,
+                "damage": 0.1
+              }
+            }
+          ]
+        },
+        {
+          "name": "Долбесбург",
+          "effects": [
+            {
+              "type": "slesandra_productivity_bonus",
+              "parameters": {
+                "bonus_percent": 0.2
+              }
+            },
+            {
+              "type": "satisfaction_cost_multiplier",
+              "parameters": {
+                "multiplier": 1.3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Бичленд",
+      "fauna": {
+        "slesandra": 1,
+        "sisandra": 3,
+        "chuchundra": 1
+      },
+      "areas": [
+        {
+          "name": "Курамарибы",
+          "effects": [
+            {
+              "type": "sisandra_fatigue_probability_after_first",
+              "parameters": {
+                "probability": 0.7,
+                "applies_from_step": 2,
+                "inactive_for_steps": 1
+              }
+            }
+          ]
+        },
+        {
+          "name": "Пунта-пеликана",
+          "effects": [
+            {
+              "type": "sisandra_productivity_bonus_after_first",
+              "parameters": {
+                "bonus_percent": 0.23,
+                "applies_from_step": 2
+              }
+            },
+            {
+              "type": "money_wipe_on_stay_probability",
+              "parameters": {
+                "probability": 0.2,
+                "loss_share": 0.5,
+                "applies_from_step": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Праналенд",
+      "fauna": {
+        "slesandra": 1,
+        "sisandra": 1,
+        "chuchundra": 3
+      },
+      "areas": [
+        {
+          "name": "Шринавас",
+          "effects": [
+            {
+              "type": "chuchundra_productivity_bonus",
+              "parameters": {
+                "bonus_percent": 0.13
+              }
+            }
+          ]
+        },
+        {
+          "name": "Харе-Кириши",
+          "effects": [
+            {
+              "type": "drocents_health_penalty_per_step",
+              "parameters": {
+                "extra_health_percent": 0.1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "races": [
+    {
+      "name": "Шлендрики",
+      "peoples": [
+        {
+          "name": "Можоры",
+          "effects": [
+            {
+              "type": "mozhory_gulbonit_money_increase",
+              "parameters": {
+                "multiplier": 1.23
+              }
+            },
+            {
+              "type": "mozhory_zumbalit_health_save",
+              "parameters": {
+                "probability": 0.33
+              }
+            }
+          ]
+        },
+        {
+          "name": "Нищебороды",
+          "effects": [
+            {
+              "type": "nishchebory_gulbonit_money_decrease",
+              "parameters": {
+                "multiplier": 0.13
+              }
+            },
+            {
+              "type": "nishchebory_gulbonit_health_increase",
+              "parameters": {
+                "multiplier": 1.76
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Хипстики",
+      "peoples": [
+        {
+          "name": "Соевые",
+          "effects": [
+            {
+              "type": "soyevye_zumbalit_health_penalty",
+              "parameters": {
+                "penalty_per_chuchundra": 0.12
+              }
+            }
+          ]
+        },
+        {
+          "name": "Просветленные",
+          "effects": [
+            {
+              "type": "prosvetlennye_shlyamsat_history_bonus",
+              "parameters": {
+                "satisfaction_per_sisandra": 0.31,
+                "history_steps": 3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Скуфики",
+      "peoples": [
+        {
+          "name": "Дроценты",
+          "effects": [
+            {
+              "type": "drotsenty_gulbonit_efficiency_decrease",
+              "parameters": {
+                "multiplier": 0.5
+              }
+            }
+          ]
+        },
+        {
+          "name": "Железноухие",
+          "effects": [
+            {
+              "type": "zheleznoukhi_zumbalit_satisfaction_immunity",
+              "parameters": {}
+            },
+            {
+              "type": "zheleznoukhi_zumbalit_money_loss_chance",
+              "parameters": {
+                "probability": 0.33
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+    "activities": [
+    {"name": "zumbalit"},
+    {"name": "gulbonit"},
+    {"name": "shlyamsat"},
+    {"name": "none"}
+  ]
+}

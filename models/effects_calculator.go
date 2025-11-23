@@ -187,7 +187,7 @@ func (ec *EffectsCalculator) applyAreaEffect(result *EffectResult, effect Effect
 	switch effect.Type {
 
 	// Балбесбург
-	case EffectSlesandraDamageChance:
+	case EffectBalbesburgSlesandraDamageChance:
 		probability := effect.Parameters["probability"].(float64)
 		damage := effect.Parameters["damage"].(float64)
 		for i := 0; i < location.Fauna.Slesandra; i++ {
@@ -197,18 +197,18 @@ func (ec *EffectsCalculator) applyAreaEffect(result *EffectResult, effect Effect
 		}
 
 	// Долбесбург
-	case EffectSlesandraProductivityBonus:
+	case EffectDolbesburgSlesandraProductivityBonus:
 		if activity == "zumbalit" {
 			bonus := effect.Parameters["bonus_percent"].(float64)
 			result.MoneyChange *= (1 + bonus)
 		}
 
-	case EffectSatisfactionCostMultiplier:
+	case EffectDolbesburgSatisfactionCostMultiplier:
 		multiplier := effect.Parameters["multiplier"].(float64)
 		result.SatisfactionChange *= multiplier
 
 	// Курамарибы
-	case EffectSisandraFatigueProbability:
+	case EffectKuramaribySisandraFatigueProbability:
 		if stayCount >= 2 && activity == "gulbonit" {
 			probability := effect.Parameters["probability"].(float64)
 			workingSisandra := 0
@@ -225,27 +225,27 @@ func (ec *EffectsCalculator) applyAreaEffect(result *EffectResult, effect Effect
 		}
 
 	// Пунта-пеликана
-	case EffectSisandraProductivityBonusAfterFirst:
+	case EffectPuntaPelikanaSisandraProductivityBonus:
 		if stayCount >= 2 && activity == "gulbonit" {
 			bonus := effect.Parameters["bonus_percent"].(float64)
 			result.SatisfactionChange *= (1 + bonus)
 		}
 
-	case EffectMoneyWipeOnStayProbability:
+	case EffectPuntaPelikanaMoneyWipeProbability:
 		if stayCount >= 2 && rand.Float64() < effect.Parameters["probability"].(float64) {
 			lossShare := effect.Parameters["loss_share"].(float64)
 			result.MoneyChange -= durlian.Stats.Money * lossShare
 		}
 
 	// Шринавас
-	case EffectChuchundraProductivityBonus:
+	case EffectShrinavasChuchundraProductivityBonus:
 		if activity == "shlyamsat" {
 			bonus := effect.Parameters["bonus_percent"].(float64)
 			result.HealthChange *= (1 + bonus)
 		}
 
 	// Харе-Кириши
-	case EffectDrocentsHealthPenaltyPerStep:
+	case EffectHareKirishiDrotsentyHealthPenalty:
 		if durlian.People == "Дроценты" {
 			penalty := effect.Parameters["extra_health_percent"].(float64)
 			result.HealthChange -= durlian.Stats.Health * penalty

@@ -148,7 +148,6 @@ func (s *Simulator) applyAction(durlian *models.Durlian, action *models.Action,
 		IsCriticalEvent:  isCritical,
 		Notes:            s.generateStepNotes(durlian, *effectResult, isCritical),
 	}
-	durlian.AddHistoryEntry(stepHistory)
 
 	return stepHistory
 }

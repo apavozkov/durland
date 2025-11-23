@@ -292,3 +292,16 @@ func (ec *EffectsCalculator) getStayCount(durlianID int64, location string) int 
 	}
 	return ec.stayCounts[durlianID][location]
 }
+
+func (ec *EffectsCalculator) GetFaunaInfo(durlian *Durlian, worldState *WorldState) FaunaInfo {
+	location := ec.findLocation(durlian.CurrentLocation, worldState)
+	if location == nil {
+		return FaunaInfo{}
+	}
+
+	return FaunaInfo{
+		SlesandraCount:  location.Fauna.Slesandra,
+		SisandraCount:   location.Fauna.Sisandra,
+		ChuchundraCount: location.Fauna.Chuchundra,
+	}
+}

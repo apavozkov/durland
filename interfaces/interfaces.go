@@ -10,6 +10,7 @@ type Strategy interface {
 // Интерфейс для расчета эффектов от действий
 type EffectsCalculator interface {
 	CalculateEffects(durlian *models.Durlian, activity *models.Activity, worldState *models.WorldState) *models.EffectResult
+	GetFaunaInfo(durlian *models.Durlian, worldState *models.WorldState) models.FaunaInfo
 }
 
 // Для интерфейса стратегии: даю всего дурляндца(с его историей и тп) + состаяние мира(см. файлы models/durlian.go и models/simulation.go).

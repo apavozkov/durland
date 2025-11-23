@@ -1,13 +1,15 @@
-package models
+package strategy
 
 import (
+	"durland/models"
 	"strings"
 )
 
 type BasicStrategy struct {
 }
 
-func (v BasicStrategy) DecideNextAction(d Durlian) Action {
+// func (v BasicStrategy) DecideNextAction(d Durlian) Action {
+func (v BasicStrategy) DecideNextAction(d *models.Durlian, worldState *models.WorldState) *models.Action {
 
 	steps := d.KnownInfo.Steps
 	history := d.KnownInfo.History

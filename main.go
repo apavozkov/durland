@@ -3,6 +3,7 @@ package main
 import (
 	"durland/models"
 	simulator "durland/simulation"
+	"durland/strategy"
 	"fmt"
 	"log"
 )
@@ -39,7 +40,7 @@ func main() {
 	worldState.Activities = activities
 
 	// Создаем стратегию и калькулятор эффектов
-	strategy := models.BasicStrategy{}
+	strategy := strategy.BasicStrategy{}
 	effectsCalculator := models.NewEffectsCalculator()
 
 	// Запускаем симуляцию

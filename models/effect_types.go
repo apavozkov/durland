@@ -25,16 +25,3 @@ const (
 	EffectZheleznoukhiZumbalitSatisfactionImmunity = "zheleznoukhi_zumbalit_satisfaction_immunity"
 	EffectZheleznoukhiZumbalitMoneyLossChance      = "zheleznoukhi_zumbalit_money_loss_chance"
 )
-
-// Типы эффектов локаций
-
-const (
-	EffectBalbesburgSlesandraDamageChance        = "balbesburg_slesandra_damage_chance"
-	EffectDolbesburgSlesandraProductivityBonus   = "dolbesburg_slesandra_productivity_bonus"
-	EffectDolbesburgSatisfactionCostMultiplier   = "dolbesburg_satisfaction_cost_multiplier"
-	EffectKuramaribySisandraFatigueProbability   = "kuramariby_sisandra_fatigue_probability"
-	EffectPuntaPelikanaSisandraProductivityBonus = "punta_pelikana_sisandra_productivity_bonus"
-	EffectPuntaPelikanaMoneyWipeProbability      = "punta_pelikana_money_wipe_probability"
-	EffectShrinavasChuchundraProductivityBonus   = "shrinavas_chuchundra_productivity_bonus"
-	EffectHareKirishiDrotsentyHealthPenalty      = "hare_kirishi_drotsenty_health_penalty"
-)

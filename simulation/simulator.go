@@ -98,7 +98,6 @@ func (s *Simulator) applyAction(durlian *models.Durlian, action *models.Action,
 		if action.TargetArea != "" {
 			durlian.CurrentArea = action.TargetArea
 		}
-		durlian.History = append(durlian.History, durlian.CurrentLocation)
 	}
 
 	// Обрабатываем деятельность
@@ -135,10 +134,10 @@ func (s *Simulator) applyAction(durlian *models.Durlian, action *models.Action,
 	durlian.Stats.Satisfaction += effectResult.SatisfactionChange
 
 	// Создаем историю шага
-	return &models.StepHistory{
+	stepHistory := &models.StepHistory{
 		Step:             step,
-		Location:         durlian.CurrentLocation,
-		Area:             durlian.CurrentArea,
+		Location:         durlian.CurrentLocation, // Здесь уже обновленная локация
+		Area:             durlian.CurrentArea,     // Здесь уже обновленная местность
 		Activity:         durlian.CurrentActivity,
 		StatsBefore:      statsBefore,
 		StatsAfter:       durlian.Stats,
@@ -149,6 +148,7 @@ func (s *Simulator) applyAction(durlian *models.Durlian, action *models.Action,
 		Notes:            s.generateStepNotes(durlian, *effectResult, isCritical),
 	}
 
+	durlian.AddHistoryEntry(stepHistory)
 	return stepHistory
 }
 

@@ -8,6 +8,7 @@ import (
 
 // WorldDefinition задает описание мира: локации, фауна и доступные активности
 type WorldDefinition struct {
+	Races      []Race     `json:"races"`
 	Locations  []Location `json:"locations"`
 	Activities []Activity `json:"activities,omitempty"`
 }

@@ -94,10 +94,7 @@ func NewDurlian(races []Race, locations []Location) *Durlian {
 // Обновляет информацию, известную дурляндцу
 func (d *Durlian) UpdateKnownInfo() {
 	// Создаем копию истории для KnownInfo (без чувствительных данных)
-	var knownHistory []*StepHistory
-	for _, history := range d.History {
-		knownHistory = append(knownHistory, history)
-	}
+	knownHistory := append([]*StepHistory{}, d.History...)
 
 	d.KnownInfo = KnownInfo{
 		ID:              d.ID,
@@ -105,7 +102,7 @@ func (d *Durlian) UpdateKnownInfo() {
 		CurrentArea:     d.CurrentArea,
 		CurrentActivity: d.CurrentActivity,
 		Stats:           d.Stats,
-		History:         d.History,
+		History:         knownHistory,
 		Steps:           d.Steps,
 		IsAlive:         d.IsAlive,
 	}

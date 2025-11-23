@@ -15,29 +15,29 @@ type Stats struct {
 
 // Хар-ки дурляндца
 type Durlian struct {
-	ID              int64     `json:"id"`
-	Race            string    `json:"race"`   // Скрыто от дурляндца
-	People          string    `json:"people"` // Скрыто от дурляндца
-	CurrentLocation string    `json:"current_location"`
-	CurrentArea     string    `json:"current_area"`
-	CurrentActivity string    `json:"current_activity"`
-	Stats           Stats     `json:"stats"`
-	History         []string  `json:"history"`
-	Steps           int       `json:"steps"`
-	IsAlive         bool      `json:"is_alive"`
-	KnownInfo       KnownInfo `json:"known_info"` // То, что знает дурляндец
+	ID              int64          `json:"id"`
+	Race            string         `json:"race"`   // Скрыто от дурляндца
+	People          string         `json:"people"` // Скрыто от дурляндца
+	CurrentLocation string         `json:"current_location"`
+	CurrentArea     string         `json:"current_area"`
+	CurrentActivity string         `json:"current_activity"`
+	Stats           Stats          `json:"stats"`
+	History         []*StepHistory `json:"history"`
+	Steps           int            `json:"steps"`
+	IsAlive         bool           `json:"is_alive"`
+	KnownInfo       KnownInfo      `json:"known_info"` // То, что знает дурляндец
 }
 
 // Информация, доступная дурляндцу о себе
 type KnownInfo struct {
-	ID              int64    `json:"id"`
-	CurrentLocation string   `json:"current_location"`
-	CurrentArea     string   `json:"current_area"`
-	CurrentActivity string   `json:"current_activity"`
-	Stats           Stats    `json:"stats"`
-	History         []string `json:"history"`
-	Steps           int      `json:"steps"`
-	IsAlive         bool     `json:"is_alive"`
+	ID              int64          `json:"id"`
+	CurrentLocation string         `json:"current_location"`
+	CurrentArea     string         `json:"current_area"`
+	CurrentActivity string         `json:"current_activity"`
+	Stats           Stats          `json:"stats"`
+	History         []*StepHistory `json:"history"`
+	Steps           int            `json:"steps"`
+	IsAlive         bool           `json:"is_alive"`
 }
 
 // Создаёт нового случайного дурляндца
@@ -62,10 +62,28 @@ func NewDurlian(races []Race, locations []Location) *Durlian {
 		CurrentArea:     area.Name,
 		CurrentActivity: "none",
 		Stats:           Stats{Health: 10, Money: 10, Satisfaction: 10},
-		History:         []string{location.Name},
+		History:         []*StepHistory{},
 		Steps:           0,
 		IsAlive:         true,
 	}
+
+	// Добавляем начальное состояние в историю
+	initialHistory := &StepHistory{
+		Step:        0,
+		Location:    location.Name,
+		Area:        area.Name,
+		Activity:    "рождение",
+		StatsBefore: Stats{Health: 10, Money: 10, Satisfaction: 10},
+		StatsAfter:  Stats{Health: 10, Money: 10, Satisfaction: 10},
+		Effects:     EffectResult{},
+		Action:      Action{Type: "рождение"},
+		FaunaEncountered: FaunaInfo{
+			SlesandraCount:  location.Fauna.Slesandra,
+			SisandraCount:   location.Fauna.Sisandra,
+			ChuchundraCount: location.Fauna.Chuchundra,
+		},
+	}
+	durlian.History = append(durlian.History, initialHistory)
 
 	// Инициализируем известную информацию
 	durlian.UpdateKnownInfo()
@@ -75,6 +93,12 @@ func NewDurlian(races []Race, locations []Location) *Durlian {
 
 // Обновляет информацию, известную дурляндцу
 func (d *Durlian) UpdateKnownInfo() {
+	// Создаем копию истории для KnownInfo (без чувствительных данных)
+	var knownHistory []*StepHistory
+	for _, history := range d.History {
+		knownHistory = append(knownHistory, history)
+	}
+
 	d.KnownInfo = KnownInfo{
 		ID:              d.ID,
 		CurrentLocation: d.CurrentLocation,
@@ -90,4 +114,10 @@ func (d *Durlian) UpdateKnownInfo() {
 // Проверяет, погиб ли дурляндец
 func (d *Durlian) IsDead() bool {
 	return d.Stats.Health <= 0 || d.Stats.Money <= 0 || d.Stats.Satisfaction <= 0
+}
+
+// Добавляет запись в историю
+func (d *Durlian) AddHistoryEntry(entry *StepHistory) {
+	d.History = append(d.History, entry)
+	d.UpdateKnownInfo()
 }

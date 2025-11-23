@@ -36,12 +36,22 @@ type SimulationResult struct {
 
 // История одного шага
 type StepHistory struct {
-	Step        int          `json:"step"`
-	Location    string       `json:"location"`
-	Area        string       `json:"area"`
-	Activity    string       `json:"activity"`
-	StatsBefore Stats        `json:"stats_before"`
-	StatsAfter  Stats        `json:"stats_after"`
-	Effects     EffectResult `json:"effects"`
-	Action      Action       `json:"action"`
+	Step             int          `json:"step"`
+	Location         string       `json:"location"`
+	Area             string       `json:"area"`
+	Activity         string       `json:"activity"`
+	StatsBefore      Stats        `json:"stats_before"`
+	StatsAfter       Stats        `json:"stats_after"`
+	Effects          EffectResult `json:"effects"`
+	Action           Action       `json:"action"`
+	FaunaEncountered FaunaInfo    `json:"fauna_encountered"`
+	IsCriticalEvent  bool         `json:"is_critical_event"`
+	Notes            string       `json:"notes"`
+}
+
+// Информация о встреченной фауне
+type FaunaInfo struct {
+	SlesandraCount  int `json:"slesandra_count"`
+	SisandraCount   int `json:"sisandra_count"`
+	ChuchundraCount int `json:"chuchundra_count"`
 }

@@ -5,11 +5,9 @@ import (
 )
 
 type BasicStrategy struct {
-	
 }
 
-
-func  (v BasicStrategy) DecideNextAction(d Durlian) Action {
+func (v BasicStrategy) DecideNextAction(d Durlian) Action {
 
 	steps := d.KnownInfo.Steps
 	history := d.KnownInfo.History
@@ -44,7 +42,7 @@ func  (v BasicStrategy) DecideNextAction(d Durlian) Action {
 			return Action{Type: "move", TargetLocation: "pranaland"}
 		}
 		if count(history, "shlyams") < 5 {
-			return Action{Type: "activity",Activity: "shlyamsat"}
+			return Action{Type: "activity", Activity: "shlyamsat"}
 		}
 	}
 

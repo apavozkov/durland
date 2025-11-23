@@ -126,7 +126,7 @@ func (s *Simulator) applyAction(durlian *models.Durlian, action *models.Action,
 	faunaInfo := s.effectsCalculator.GetFaunaInfo(durlian, s.worldState)
 
 	// Проверяем на критические события
-	isCritical := s.checkCriticalEvent(durlian, statsBefore, *effectResult)
+	isCritical := s.checkCriticalEvent(durlian, *effectResult)
 
 	// Обновляем статистику
 	durlian.Stats.Health += effectResult.HealthChange
@@ -153,7 +153,7 @@ func (s *Simulator) applyAction(durlian *models.Durlian, action *models.Action,
 }
 
 // Проверяет критические события (почти смерть, резкие изменения и т.п.)
-func (s *Simulator) checkCriticalEvent(durlian *models.Durlian, statsBefore models.Stats, effectResult models.EffectResult) bool {
+func (s *Simulator) checkCriticalEvent(durlian *models.Durlian, effectResult models.EffectResult) bool {
 	// Проверяем, не упал ли показатель ниже 2 (критический уровень)
 	if durlian.Stats.Health <= 2 || durlian.Stats.Money <= 2 || durlian.Stats.Satisfaction <= 2 {
 		return true

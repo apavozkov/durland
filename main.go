@@ -40,7 +40,7 @@ func main() {
 	worldState.Activities = activities
 
 	// Создаем стратегию и калькулятор эффектов
-	strategy := strategy.BasicStrategy{}
+	strategy := strategy.NewRandomStrategy()
 	effectsCalculator := models.NewEffectsCalculator()
 
 	// Запускаем симуляцию

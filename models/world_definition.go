@@ -8,6 +8,7 @@ import (
 
 // WorldDefinition задает описание мира: локации, фауна и доступные активности
 type WorldDefinition struct {
+	Races      []Race     `json:"races"`
 	Locations  []Location `json:"locations"`
 	Activities []Activity `json:"activities,omitempty"`
 }
@@ -15,6 +16,7 @@ type WorldDefinition struct {
 // ToWorldState превращает описание в состояние мира.
 func (wd WorldDefinition) ToWorldState() *WorldState {
 	return &WorldState{
+		Races:      wd.Races,
 		Locations:  wd.Locations,
 		Activities: wd.Activities,
 		Step:       0,
@@ -46,4 +48,62 @@ func LoadWorldDefinition(path string) (WorldDefinition, error) {
 	}
 
 	return def, nil
+}
+
+// LoadRacesDefinition читает JSON с описанием рас и народов
+func LoadRacesDefinition(path string) ([]Race, error) {
+	if path == "" {
+		return nil, fmt.Errorf("races definition path is required")
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read races definition: %w", err)
+	}
+
+	if len(data) == 0 {
+		return nil, fmt.Errorf("races definition file is empty: %s", path)
+	}
+
+	var racesDef struct {
+		Races []Race `json:"races"`
+	}
+	if err := json.Unmarshal(data, &racesDef); err != nil {
+		return nil, fmt.Errorf("decode races definition: %w", err)
+	}
+
+	if len(racesDef.Races) == 0 {
+		return nil, fmt.Errorf("races definition has no races: %s", path)
+	}
+
+	return racesDef.Races, nil
+}
+
+// LoadActivitiesDefinition читает JSON с описанием активностей
+func LoadActivitiesDefinition(path string) ([]Activity, error) {
+	if path == "" {
+		return nil, fmt.Errorf("activities definition path is required")
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read activities definition: %w", err)
+	}
+
+	if len(data) == 0 {
+		return nil, fmt.Errorf("activities definition file is empty: %s", path)
+	}
+
+	var activitiesDef struct {
+		Activities []Activity `json:"activities"`
+	}
+	if err := json.Unmarshal(data, &activitiesDef); err != nil {
+		return nil, fmt.Errorf("decode activities definition: %w", err)
+	}
+
+	if len(activitiesDef.Activities) == 0 {
+		return nil, fmt.Errorf("activities definition has no activities: %s", path)
+	}
+
+	return activitiesDef.Activities, nil
 }

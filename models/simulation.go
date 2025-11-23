@@ -2,6 +2,7 @@ package models
 
 // Состояние мира
 type WorldState struct {
+	Races      []Race     `json:"races"`
 	Locations  []Location `json:"locations"`
 	Activities []Activity `json:"activities"`
 	Step       int        `json:"step"`

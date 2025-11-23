@@ -9,7 +9,7 @@ type BasicStrategy struct {
 }
 
 
-func  (v BasicStrategy) Run(d Durlian) Action {
+func  (v BasicStrategy) DecideNextAction(d Durlian) Action {
 
 	steps := d.KnownInfo.Steps
 	history := d.KnownInfo.History

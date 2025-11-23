@@ -26,7 +26,7 @@ const (
 	EffectZheleznoukhiZumbalitMoneyLossChance      = "zheleznoukhi_zumbalit_money_loss_chance"
 )
 
-// Типы эффетов локаций
+// Типы эффектов локаций
 
 const (
 	EffectBalbesburgSlesandraDamageChance        = "balbesburg_slesandra_damage_chance"

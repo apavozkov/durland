@@ -1,8 +1,105 @@
-{  
-    "activities": [
-    {"name": "zumbalit"},
-    {"name": "gulbonit"},
-    {"name": "shlyamsat"},
-    {"name": "none"}
+{
+  "activities": [
+    {
+      "name": "zumbalit",
+      "base_effects": [
+        {
+          "type": "add_health",
+          "parameters": {
+            "value": -1.0
+          }
+        },
+        {
+          "type": "add_satisfaction", 
+          "parameters": {
+            "value": -1.0
+          }
+        }
+      ],
+      "fauna_effects": [
+        {
+          "type": "fauna_based_money",
+          "parameters": {
+            "fauna_type": "slesandra",
+            "amount_per_creature": 2.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "gulbonit",
+      "base_effects": [
+        {
+          "type": "add_health",
+          "parameters": {
+            "value": -1.0
+          }
+        },
+        {
+          "type": "add_money",
+          "parameters": {
+            "value": -1.0
+          }
+        }
+      ],
+      "fauna_effects": [
+        {
+          "type": "fauna_based_satisfaction",
+          "parameters": {
+            "fauna_type": "sisandra", 
+            "amount_per_creature": 2.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "shlyamsat",
+      "base_effects": [
+        {
+          "type": "add_money",
+          "parameters": {
+            "value": -1.0
+          }
+        },
+        {
+          "type": "add_satisfaction",
+          "parameters": {
+            "value": -1.0
+          }
+        }
+      ],
+      "fauna_effects": [
+        {
+          "type": "fauna_based_health",
+          "parameters": {
+            "fauna_type": "chuchundra",
+            "amount_per_creature": 2.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "none",
+      "base_effects": [
+        {
+          "type": "add_health",
+          "parameters": {
+            "value": -0.5
+          }
+        },
+        {
+          "type": "add_money",
+          "parameters": {
+            "value": -0.5
+          }
+        },
+        {
+          "type": "add_satisfaction",
+          "parameters": {
+            "value": -0.5
+          }
+        }
+      ]
+    }
   ]
 }

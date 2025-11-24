@@ -5,13 +5,25 @@ import (
 )
 
 type EffectsCalculator struct {
-	stayCounts map[int64]map[string]int
+	stayCounts        map[int64]map[string]int
+	effectRegistry    map[string]EffectHandler
+	conditionRegistry map[string]ConditionChecker
 }
 
+type EffectHandler func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{})
+type ConditionChecker func(durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) bool
+
 func NewEffectsCalculator() *EffectsCalculator {
-	return &EffectsCalculator{
-		stayCounts: make(map[int64]map[string]int),
+	ec := &EffectsCalculator{
+		stayCounts:        make(map[int64]map[string]int),
+		effectRegistry:    make(map[string]EffectHandler),
+		conditionRegistry: make(map[string]ConditionChecker),
 	}
+
+	ec.registerDefaultHandlers()
+	ec.registerDefaultConditions()
+
+	return ec
 }
 
 // Основной метод расчета эффектов
@@ -33,34 +45,64 @@ func (ec *EffectsCalculator) CalculateEffects(durlian *Durlian, activity *Activi
 	return result
 }
 
-// Базовые эффекты занятий
+// Базовые эффекты занятий (из JSON)
 func (ec *EffectsCalculator) applyBaseActivityEffects(result *EffectResult, activity string, durlian *Durlian, worldState *WorldState) {
-	location := ec.findLocation(durlian.CurrentLocation, worldState)
-	if location == nil {
-		return
+	// Находим активность в конфиге
+	var activityConfig *Activity
+	for i := range worldState.Activities {
+		if worldState.Activities[i].Name == activity {
+			activityConfig = &worldState.Activities[i]
+			break
+		}
 	}
 
-	switch activity {
-	case "zumbalit": // Зумбалить
-		result.HealthChange -= 1.0
-		result.SatisfactionChange -= 1.0
-		result.MoneyChange += 2.0 * float64(location.Fauna.Slesandra)
-
-	case "gulbonit": // Гульбонить
-		result.HealthChange -= 1.0
-		result.MoneyChange -= 1.0
-		result.SatisfactionChange += 2.0 * float64(location.Fauna.Sisandra)
-
-	case "shlyamsat": // Шлямсать
-		result.MoneyChange -= 1.0
-		result.SatisfactionChange -= 1.0
-		result.HealthChange += 2.0 * float64(location.Fauna.Chuchundra)
-
-	case "none": // Ничего не делать
-		result.HealthChange -= 0.5
-		result.MoneyChange -= 0.5
-		result.SatisfactionChange -= 0.5
+	if activityConfig == nil {
+		// Дефолтная активность - ничего не делать
+		activityConfig = &Activity{
+			Name: "none",
+			BaseEffects: []Effect{
+				{
+					Type:       "add_health",
+					Parameters: map[string]interface{}{"value": -0.5},
+				},
+				{
+					Type:       "add_money",
+					Parameters: map[string]interface{}{"value": -0.5},
+				},
+				{
+					Type:       "add_satisfaction",
+					Parameters: map[string]interface{}{"value": -0.5},
+				},
+			},
+		}
 	}
+
+	// Применяем все эффекты активности
+	ec.applyEffects(result, activityConfig.BaseEffects, durlian, activity, worldState)
+	ec.applyEffects(result, activityConfig.FaunaEffects, durlian, activity, worldState)
+}
+
+// Универсальное применение эффектов
+func (ec *EffectsCalculator) applyEffects(result *EffectResult, effects []Effect, durlian *Durlian, activity string, worldState *WorldState) {
+	for _, effect := range effects {
+		if ec.checkConditions(effect.Conditions, durlian, activity, worldState) {
+			if handler, exists := ec.effectRegistry[effect.Type]; exists {
+				handler(result, durlian, activity, worldState, effect.Parameters)
+			}
+		}
+	}
+}
+
+// Проверка условий применения эффекта
+func (ec *EffectsCalculator) checkConditions(conditions []EffectCondition, durlian *Durlian, activity string, worldState *WorldState) bool {
+	for _, condition := range conditions {
+		if checker, exists := ec.conditionRegistry[condition.Type]; exists {
+			if !checker(durlian, activity, worldState, condition.Parameters) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // Эффекты народов
@@ -69,9 +111,7 @@ func (ec *EffectsCalculator) applyPeopleEffects(result *EffectResult, durlian *D
 		if race.Name == durlian.Race {
 			for _, people := range race.Peoples {
 				if people.Name == durlian.People {
-					for _, effect := range people.Effects {
-						ec.applyPeopleEffect(result, effect, durlian, activity, worldState)
-					}
+					ec.applyEffects(result, people.Effects, durlian, activity, worldState)
 					break
 				}
 			}
@@ -95,161 +135,258 @@ func (ec *EffectsCalculator) applyAreaEffects(result *EffectResult, durlian *Dur
 		}
 	}
 
-	if area == nil {
-		return
-	}
-
-	for _, effect := range area.Effects {
-		ec.applyAreaEffect(result, effect, durlian, activity, worldState)
+	if area != nil {
+		ec.applyEffects(result, area.Effects, durlian, activity, worldState)
 	}
 }
 
-// Применение конкретных эффектов народов
-func (ec *EffectsCalculator) applyPeopleEffect(result *EffectResult, effect Effect, durlian *Durlian, activity string, worldState *WorldState) {
-	location := ec.findLocation(durlian.CurrentLocation, worldState)
-
-	switch effect.Type {
-
-	// Шлендрики-Можоры
-	case EffectMozhoryGulbonitMoneyIncrease:
-		if activity == "gulbonit" {
-			multiplier := effect.Parameters["multiplier"].(float64)
-			result.MoneyChange *= multiplier
+// Регистрация обработчиков эффектов
+func (ec *EffectsCalculator) registerDefaultHandlers() {
+	// Простые добавления к статам
+	ec.effectRegistry["add_health"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if value, ok := params["value"].(float64); ok {
+			result.HealthChange += value
 		}
+	}
 
-	case EffectMozhoryZumbalitHealthSave:
-		if activity == "zumbalit" && rand.Float64() < effect.Parameters["probability"].(float64) {
-			result.HealthChange = 0 // Не тратим здоровье
+	ec.effectRegistry["add_money"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if value, ok := params["value"].(float64); ok {
+			result.MoneyChange += value
 		}
+	}
 
-	// Шлендрики-Нищебороды
-	case EffectNishcheboryGulbonitMoneyDecrease:
-		if activity == "gulbonit" {
-			multiplier := effect.Parameters["multiplier"].(float64)
-			result.MoneyChange *= multiplier
+	ec.effectRegistry["add_satisfaction"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if value, ok := params["value"].(float64); ok {
+			result.SatisfactionChange += value
 		}
+	}
 
-	case EffectNishcheboryGulbonitHealthIncrease:
-		if activity == "gulbonit" {
-			multiplier := effect.Parameters["multiplier"].(float64)
+	// Базовые модификаторы
+	ec.effectRegistry["multiply_health_change"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if multiplier, ok := params["multiplier"].(float64); ok {
 			result.HealthChange *= multiplier
 		}
+	}
 
-	// Хипстики-Соевые
-	case EffectSoyevyeZumbalitHealthPenalty:
-		if activity == "zumbalit" && location != nil {
-			penalty := effect.Parameters["penalty_per_chuchundra"].(float64)
-			result.HealthChange -= penalty * float64(location.Fauna.Chuchundra)
+	ec.effectRegistry["multiply_money_change"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if multiplier, ok := params["multiplier"].(float64); ok {
+			result.MoneyChange *= multiplier
 		}
+	}
 
-	// Хипстики-Просветленные
-	case EffectProsvetlennyeShlyamsatHistoryBonus:
-		if activity == "shlyamsat" {
-			bonus := effect.Parameters["satisfaction_per_sisandra"].(float64)
-			historySteps := int(effect.Parameters["history_steps"].(float64))
-			sisandraCount := ec.countSisandraInHistory(durlian.History, worldState, historySteps)
-			result.SatisfactionChange += bonus * float64(sisandraCount)
+	ec.effectRegistry["multiply_satisfaction_change"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if multiplier, ok := params["multiplier"].(float64); ok {
+			result.SatisfactionChange *= multiplier
 		}
+	}
 
-	// Скуфики-Дроценты
-	case EffectDrotsentyGulbonitEfficiencyDecrease:
-		if activity == "gulbonit" {
-			multiplier := effect.Parameters["multiplier"].(float64)
+	ec.effectRegistry["multiply_all_changes"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if multiplier, ok := params["multiplier"].(float64); ok {
 			result.HealthChange *= multiplier
 			result.MoneyChange *= multiplier
 			result.SatisfactionChange *= multiplier
 		}
+	}
 
-	// Скуфики-Железноухие
-	case EffectZheleznoukhiZumbalitSatisfactionImmunity:
-		if activity == "zumbalit" {
-			result.SatisfactionChange = 0
+	// Фауна-базированные эффекты
+	ec.effectRegistry["fauna_based_health"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		location := ec.findLocation(durlian.CurrentLocation, worldState)
+		if location == nil {
+			return
 		}
 
-	case EffectZheleznoukhiZumbalitMoneyLossChance:
-		if activity == "zumbalit" && rand.Float64() < effect.Parameters["probability"].(float64) {
-			if location != nil {
-				result.MoneyChange -= 2.0 * float64(location.Fauna.Slesandra)
+		if amount, ok := params["amount_per_creature"].(float64); ok {
+			if faunaType, ok := params["fauna_type"].(string); ok {
+				var creatureCount int
+				switch faunaType {
+				case "slesandra":
+					creatureCount = location.Fauna.Slesandra
+				case "sisandra":
+					creatureCount = location.Fauna.Sisandra
+				case "chuchundra":
+					creatureCount = location.Fauna.Chuchundra
+				}
+				result.HealthChange += amount * float64(creatureCount)
+			}
+		}
+	}
+
+	ec.effectRegistry["fauna_based_money"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		location := ec.findLocation(durlian.CurrentLocation, worldState)
+		if location == nil {
+			return
+		}
+
+		if amount, ok := params["amount_per_creature"].(float64); ok {
+			if faunaType, ok := params["fauna_type"].(string); ok {
+				var creatureCount int
+				switch faunaType {
+				case "slesandra":
+					creatureCount = location.Fauna.Slesandra
+				case "sisandra":
+					creatureCount = location.Fauna.Sisandra
+				case "chuchundra":
+					creatureCount = location.Fauna.Chuchundra
+				}
+				result.MoneyChange += amount * float64(creatureCount)
+			}
+		}
+	}
+
+	ec.effectRegistry["fauna_based_satisfaction"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		location := ec.findLocation(durlian.CurrentLocation, worldState)
+		if location == nil {
+			return
+		}
+
+		if amount, ok := params["amount_per_creature"].(float64); ok {
+			if faunaType, ok := params["fauna_type"].(string); ok {
+				var creatureCount int
+				switch faunaType {
+				case "slesandra":
+					creatureCount = location.Fauna.Slesandra
+				case "sisandra":
+					creatureCount = location.Fauna.Sisandra
+				case "chuchundra":
+					creatureCount = location.Fauna.Chuchundra
+				}
+				result.SatisfactionChange += amount * float64(creatureCount)
+			}
+		}
+	}
+
+	// Вероятностные эффекты
+	ec.effectRegistry["chance_health_save"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if probability, ok := params["probability"].(float64); ok && rand.Float64() < probability {
+			if healthSave, ok := params["health_save"].(float64); ok {
+				result.HealthChange += healthSave
+			}
+		}
+	}
+
+	ec.effectRegistry["chance_fauna_money_loss"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		location := ec.findLocation(durlian.CurrentLocation, worldState)
+		if location == nil {
+			return
+		}
+
+		if probability, ok := params["probability"].(float64); ok && rand.Float64() < probability {
+			if lossPerCreature, ok := params["loss_per_creature"].(float64); ok {
+				if faunaType, ok := params["fauna_type"].(string); ok {
+					var creatureCount int
+					switch faunaType {
+					case "slesandra":
+						creatureCount = location.Fauna.Slesandra
+					case "sisandra":
+						creatureCount = location.Fauna.Sisandra
+					case "chuchundra":
+						creatureCount = location.Fauna.Chuchundra
+					}
+					result.MoneyChange -= lossPerCreature * float64(creatureCount)
+				}
+			}
+		}
+	}
+
+	// Эффекты основанные на истории
+	ec.effectRegistry["history_based_satisfaction"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if amount, ok := params["amount_per_creature"].(float64); ok {
+			if faunaType, ok := params["fauna_type"].(string); ok {
+				historySteps := 3
+				if steps, ok := params["history_steps"].(float64); ok {
+					historySteps = int(steps)
+				}
+
+				creatureCount := ec.countFaunaInHistory(durlian.History, worldState, faunaType, historySteps)
+				result.SatisfactionChange += amount * float64(creatureCount)
+			}
+		}
+	}
+
+	// Установка конкретного значения
+	ec.effectRegistry["set_stat_change"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if target, ok := params["target"].(string); ok {
+			if value, ok := params["value"].(float64); ok {
+				switch target {
+				case "health_change":
+					result.HealthChange = value
+				case "money_change":
+					result.MoneyChange = value
+				case "satisfaction_change":
+					result.SatisfactionChange = value
+				}
+			}
+		}
+	}
+
+	// Эффекты урона от фауны
+	ec.effectRegistry["chance_fauna_damage"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		location := ec.findLocation(durlian.CurrentLocation, worldState)
+		if location == nil {
+			return
+		}
+
+		if probability, ok := params["probability"].(float64); ok {
+			if damage, ok := params["damage"].(float64); ok {
+				if faunaType, ok := params["fauna_type"].(string); ok {
+					var creatureCount int
+					switch faunaType {
+					case "slesandra":
+						creatureCount = location.Fauna.Slesandra
+					case "sisandra":
+						creatureCount = location.Fauna.Sisandra
+					case "chuchundra":
+						creatureCount = location.Fauna.Chuchundra
+					}
+
+					for i := 0; i < creatureCount; i++ {
+						if rand.Float64() < probability {
+							result.HealthChange -= damage
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Эффекты потери денег
+	ec.effectRegistry["chance_money_wipe"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
+		if probability, ok := params["probability"].(float64); ok && rand.Float64() < probability {
+			if lossShare, ok := params["loss_share"].(float64); ok {
+				result.MoneyChange -= durlian.Stats.Money * lossShare
 			}
 		}
 	}
 }
 
-// Применение эффектов местностей
-func (ec *EffectsCalculator) applyAreaEffect(result *EffectResult, effect Effect, durlian *Durlian, activity string, worldState *WorldState) {
-	location := ec.findLocation(durlian.CurrentLocation, worldState)
-	if location == nil {
-		return
+// Регистрация условий
+func (ec *EffectsCalculator) registerDefaultConditions() {
+	ec.conditionRegistry["activity_is"] = func(durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) bool {
+		if requiredActivity, ok := params["activity"].(string); ok {
+			return activity == requiredActivity
+		}
+		return false
 	}
 
-	stayCount := ec.getStayCount(durlian.ID, durlian.CurrentLocation)
-
-	switch effect.Type {
-
-	// Балбесбург
-	case EffectBalbesburgSlesandraDamageChance:
-		probability := effect.Parameters["probability"].(float64)
-		damage := effect.Parameters["damage"].(float64)
-		for i := 0; i < location.Fauna.Slesandra; i++ {
-			if rand.Float64() < probability {
-				result.HealthChange -= damage
-			}
+	ec.conditionRegistry["people_is"] = func(durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) bool {
+		if requiredPeople, ok := params["people"].(string); ok {
+			return durlian.People == requiredPeople
 		}
+		return false
+	}
 
-	// Долбесбург
-	case EffectDolbesburgSlesandraProductivityBonus:
-		if activity == "zumbalit" {
-			bonus := effect.Parameters["bonus_percent"].(float64)
-			result.MoneyChange *= (1 + bonus)
+	ec.conditionRegistry["location_is"] = func(durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) bool {
+		if requiredLocation, ok := params["location"].(string); ok {
+			return durlian.CurrentLocation == requiredLocation
 		}
+		return false
+	}
 
-	case EffectDolbesburgSatisfactionCostMultiplier:
-		multiplier := effect.Parameters["multiplier"].(float64)
-		result.SatisfactionChange *= multiplier
-
-	// Курамарибы
-	case EffectKuramaribySisandraFatigueProbability:
-		if stayCount >= 2 && activity == "gulbonit" {
-			probability := effect.Parameters["probability"].(float64)
-			workingSisandra := 0
-			for i := 0; i < location.Fauna.Sisandra; i++ {
-				if rand.Float64() >= probability {
-					workingSisandra++
-				}
-			}
-			// Пересчитываем удовлетворенность только от работающих сисяндр
-			if activity == "gulbonit" {
-				baseSatisfaction := (result.SatisfactionChange + 1.0) / 2.0 // Восстанавливаем базовое значение
-				result.SatisfactionChange = baseSatisfaction*float64(workingSisandra) - 1.0
-			}
+	ec.conditionRegistry["min_stay_count"] = func(durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) bool {
+		if minCount, ok := params["min_count"].(float64); ok {
+			return ec.getStayCount(durlian.ID, durlian.CurrentLocation) >= int(minCount)
 		}
-
-	// Пунта-пеликана
-	case EffectPuntaPelikanaSisandraProductivityBonus:
-		if stayCount >= 2 && activity == "gulbonit" {
-			bonus := effect.Parameters["bonus_percent"].(float64)
-			result.SatisfactionChange *= (1 + bonus)
-		}
-
-	case EffectPuntaPelikanaMoneyWipeProbability:
-		if stayCount >= 2 && rand.Float64() < effect.Parameters["probability"].(float64) {
-			lossShare := effect.Parameters["loss_share"].(float64)
-			result.MoneyChange -= durlian.Stats.Money * lossShare
-		}
-
-	// Шринавас
-	case EffectShrinavasChuchundraProductivityBonus:
-		if activity == "shlyamsat" {
-			bonus := effect.Parameters["bonus_percent"].(float64)
-			result.HealthChange *= (1 + bonus)
-		}
-
-	// Харе-Кириши
-	case EffectHareKirishiDrotsentyHealthPenalty:
-		if durlian.People == "Дроценты" {
-			penalty := effect.Parameters["extra_health_percent"].(float64)
-			result.HealthChange -= durlian.Stats.Health * penalty
-		}
+		return false
 	}
 }
 
@@ -263,7 +400,7 @@ func (ec *EffectsCalculator) findLocation(locationName string, worldState *World
 	return nil
 }
 
-func (ec *EffectsCalculator) countSisandraInHistory(history []*StepHistory, worldState *WorldState, steps int) int {
+func (ec *EffectsCalculator) countFaunaInHistory(history []*StepHistory, worldState *WorldState, faunaType string, steps int) int {
 	count := 0
 	start := len(history) - steps
 	if start < 0 {
@@ -273,7 +410,14 @@ func (ec *EffectsCalculator) countSisandraInHistory(history []*StepHistory, worl
 	for i := start; i < len(history); i++ {
 		location := ec.findLocation(history[i].Location, worldState)
 		if location != nil {
-			count += location.Fauna.Sisandra
+			switch faunaType {
+			case "slesandra":
+				count += location.Fauna.Slesandra
+			case "sisandra":
+				count += location.Fauna.Sisandra
+			case "chuchundra":
+				count += location.Fauna.Chuchundra
+			}
 		}
 	}
 	return count

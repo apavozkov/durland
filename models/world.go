@@ -12,8 +12,14 @@ type People struct {
 	Effects []Effect `json:"effects"`
 }
 
-// Эффект народности
 type Effect struct {
+	Type       string                 `json:"type"`
+	Parameters map[string]interface{} `json:"parameters"`
+	Conditions []EffectCondition      `json:"conditions,omitempty"`
+}
+
+// Условие применения эффекта
+type EffectCondition struct {
 	Type       string                 `json:"type"`
 	Parameters map[string]interface{} `json:"parameters"`
 }
@@ -40,11 +46,9 @@ type Fauna struct {
 
 // Деятельность
 type Activity struct {
-	Name                 string  `json:"name"`
-	BaseHealthCost       float64 `json:"base_health_cost"`
-	BaseMoneyCost        float64 `json:"base_money_cost"`
-	BaseSatisfactionCost float64 `json:"base_satisfaction_cost"`
-	Gains                []Gain  `json:"gains"`
+	Name         string   `json:"name"`
+	BaseEffects  []Effect `json:"base_effects"`
+	FaunaEffects []Effect `json:"fauna_effects"`
 }
 
 // Результат действия

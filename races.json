@@ -1,5 +1,5 @@
 {
-"races": [
+  "races": [
     {
       "name": "Шлендрики",
       "peoples": [
@@ -7,15 +7,28 @@
           "name": "Можоры",
           "effects": [
             {
-              "type": "mozhory_gulbonit_money_increase",
+              "type": "multiply_money_change",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "gulbonit"}
+                }
+              ],
               "parameters": {
                 "multiplier": 1.23
               }
             },
             {
-              "type": "mozhory_zumbalit_health_save",
+              "type": "chance_health_save",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "zumbalit"}
+                }
+              ],
               "parameters": {
-                "probability": 0.33
+                "probability": 0.33,
+                "health_save": 1.0
               }
             }
           ]
@@ -24,13 +37,25 @@
           "name": "Нищебороды",
           "effects": [
             {
-              "type": "nishchebory_gulbonit_money_decrease",
+              "type": "multiply_money_change",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "gulbonit"}
+                }
+              ],
               "parameters": {
                 "multiplier": 0.13
               }
             },
             {
-              "type": "nishchebory_gulbonit_health_increase",
+              "type": "multiply_health_change",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "gulbonit"}
+                }
+              ],
               "parameters": {
                 "multiplier": 1.76
               }
@@ -46,9 +71,16 @@
           "name": "Соевые",
           "effects": [
             {
-              "type": "soyevye_zumbalit_health_penalty",
+              "type": "fauna_based_health",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "zumbalit"}
+                }
+              ],
               "parameters": {
-                "penalty_per_chuchundra": 0.12
+                "fauna_type": "chuchundra",
+                "amount_per_creature": -0.12
               }
             }
           ]
@@ -57,9 +89,16 @@
           "name": "Просветленные",
           "effects": [
             {
-              "type": "prosvetlennye_shlyamsat_history_bonus",
+              "type": "history_based_satisfaction",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "shlyamsat"}
+                }
+              ],
               "parameters": {
-                "satisfaction_per_sisandra": 0.31,
+                "fauna_type": "sisandra",
+                "amount_per_creature": 0.31,
                 "history_steps": 3
               }
             }
@@ -74,7 +113,13 @@
           "name": "Дроценты",
           "effects": [
             {
-              "type": "drotsenty_gulbonit_efficiency_decrease",
+              "type": "multiply_all_changes",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "gulbonit"}
+                }
+              ],
               "parameters": {
                 "multiplier": 0.5
               }
@@ -85,13 +130,30 @@
           "name": "Железноухие",
           "effects": [
             {
-              "type": "zheleznoukhi_zumbalit_satisfaction_immunity",
-              "parameters": {}
+              "type": "set_stat_change",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "zumbalit"}
+                }
+              ],
+              "parameters": {
+                "target": "satisfaction_change",
+                "value": 0
+              }
             },
             {
-              "type": "zheleznoukhi_zumbalit_money_loss_chance",
+              "type": "chance_fauna_money_loss",
+              "conditions": [
+                {
+                  "type": "activity_is",
+                  "parameters": {"activity": "zumbalit"}
+                }
+              ],
               "parameters": {
-                "probability": 0.33
+                "probability": 0.33,
+                "fauna_type": "slesandra",
+                "loss_per_creature": 2.0
               }
             }
           ]

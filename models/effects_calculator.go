@@ -188,7 +188,7 @@ func (ec *EffectsCalculator) registerDefaultHandlers() {
 		}
 	}
 
-	// Фауна-базированные эффекты
+	// Эффекты фауны
 	ec.effectRegistry["fauna_based_health"] = func(result *EffectResult, durlian *Durlian, activity string, worldState *WorldState, params map[string]interface{}) {
 		location := ec.findLocation(durlian.CurrentLocation, worldState)
 		if location == nil {
